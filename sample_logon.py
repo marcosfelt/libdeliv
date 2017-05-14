@@ -53,8 +53,8 @@ GRANT_TYPE = 'client_credentials'
 
 # Defaults for our simple example.
 DEFAULT_TERM = 'dinner'
-DEFAULT_LOCATION = 'San Francisco, CA'
-SEARCH_LIMIT = 3
+DEFAULT_LOCATION = '1910 Entrepreneur Drive, Raleigh, NC'
+SEARCH_LIMIT = 10
 
 
 def obtain_bearer_token(host, path):
@@ -156,14 +156,23 @@ def query_api(term, location):
 
     business_id = businesses[0]['id']
 
-    print(u'{0} businesses found, querying business info ' \
-        'for the top result "{1}" ...'.format(
-            len(businesses), business_id))
-    response = get_business(bearer_token, business_id)
+    deliverers = []
+    for business in businesses:
+        check = 'delivery' in business.get('transactions')
+        #print(business.get('transactions'))
+        #print(check)
+        if check:
+            deliverers.append(business)
 
-    print(u'Result for business "{0}" found:'.format(business_id))
-    pprint.pprint(response, indent=2)
+    print(u'{0} businesses found that deliver in your area'.format(len(deliverers)))
 
+    for delivery in deliverers:
+        location = delivery.get('location')
+        simple_location = location.get('address1') + ',' + location.get('city') + ',' + location.get('state')
+        print('{0} located at {1}. Phone: {2}'.format(
+                delivery.get('name'),
+                simple_location,
+                delivery.get('phone')))
 
 def main():
     parser = argparse.ArgumentParser()
