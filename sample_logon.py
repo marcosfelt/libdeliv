@@ -52,8 +52,8 @@ GRANT_TYPE = 'client_credentials'
 
 
 # Defaults for our simple example.
-DEFAULT_TERM = 'dinner'
-DEFAULT_LOCATION = '1910 Entrepreneur Drive, Raleigh, NC'
+DEFAULT_TERM = 'chinese'
+DEFAULT_LOCATION = 'San Francisco, CA'
 SEARCH_LIMIT = 10
 
 
@@ -109,7 +109,7 @@ def request(host, path, bearer_token, url_params=None):
     return response.json()
 
 
-def search(bearer_token, term, location):
+def search(bearer_token, term, offset, location):
     """Query the Search API by a search term and location.
     Args:
         term (str): The search term passed to the API.
@@ -121,8 +121,9 @@ def search(bearer_token, term, location):
     url_params = {
         'term': term.replace(' ', '+'),
         'location': location.replace(' ', '+'),
-        'limit': SEARCH_LIMIT
+        'offset': offset
     }
+
     return request(API_HOST, SEARCH_PATH, bearer_token, url_params=url_params)
 
 
@@ -144,35 +145,48 @@ def query_api(term, location):
         term (str): The search term to query.
         location (str): The location of the business to query.
     """
-    bearer_token = obtain_bearer_token(API_HOST, TOKEN_PATH)
-
-    response = search(bearer_token, term, location)
-
-    businesses = response.get('businesses')
-
-    if not businesses:
-        print(u'No businesses for delivery found in  {0}.'.format( location))
-        return
-
-    business_id = businesses[0]['id']
-
+    #bearer_token = obtain_bearer_token(API_HOST, TOKEN_PATH)
+    bearer_token = 'SHdrjUqMJXqXBKUc7bGIplM8y6tnbwZbXXDbWPCd9wWMP8tX9PdJrC5MZHwJRhb7jMtLjXxT-hsWjNf2OkdiDWd30HsS84AVI5iRnrpxkak3HbWXAdUKvraQ_wgXWXYx'
+    print(bearer_token)
+    offset = 0
     deliverers = []
-    for business in businesses:
-        check = 'delivery' in business.get('transactions')
-        #print(business.get('transactions'))
-        #print(check)
-        if check:
-            deliverers.append(business)
 
-    print(u'{0} businesses found that deliver in your area'.format(len(deliverers)))
+    while 1:
+        try:
+            response = search(bearer_token, term, offset, location)
+            businesses = response.get('businesses')
 
-    for delivery in deliverers:
-        location = delivery.get('location')
-        simple_location = location.get('address1') + ',' + location.get('city') + ',' + location.get('state')
-        print('{0} located at {1}. Phone: {2}'.format(
-                delivery.get('name'),
-                simple_location,
-                delivery.get('phone')))
+            if not businesses and offset==0:
+                print(u'No businesses for delivery found in {0}.'.format( location))
+                return
+
+            if not businesses and offset!=0:
+                print(u'{0} businesses found that deliver in your area'.format(len(deliverers)))
+
+                for delivery in deliverers:
+                    location = delivery.get('location')
+                    try:
+                        simple_location = location.get('address1') + ',' + location.get('city') + ',' + location.get('state')
+                        print('{0} located at {1}. Phone: {2}'.format(
+                            delivery.get('name'),
+                            simple_location,
+                            delivery.get('phone')))
+                    except TypeError:
+                        print('{0}. Location or phone number not available'.format(delivery.get('name')))
+                return
+
+            for business in businesses:
+                check = 'delivery' in business.get('transactions')
+                #print(business.get('transactions'))
+                #print(check)
+                if check:
+                    deliverers.append(business)
+        except HTTPError:
+            return
+        #Have to do this in increments of 50
+        #because the API returns data in groups of 50
+        offset = offset + 50
+
 
 def main():
     parser = argparse.ArgumentParser()
