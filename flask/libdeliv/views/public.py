@@ -8,10 +8,11 @@ from flask_login import login_user, login_required, logout_user
 
 from libdeliv.extensions import login_manager
 from libdeliv.models.user import User
-from libdeliv.forms.public import LoginForm
+from libdeliv.forms.public import LoginForm, SearchForm
 from libdeliv.forms.user import RegisterForm
 from libdeliv.utils import flash_errors, render_extensions
 from libdeliv.database import db
+import libdeliv.search as Search
 
 blueprint = Blueprint('public', __name__, static_folder="../static")
 
@@ -34,6 +35,10 @@ def home():
         else:
             flash_errors(form)
     return render_extensions("public/home.html", form=form)
+
+def search():
+    search = SearchForm(request.form)
+
 
 
 @blueprint.route('/logout/')
