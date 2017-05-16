@@ -5,6 +5,8 @@ from wtforms.validators import DataRequired
 
 from libdeliv.models.user import User
 
+class SearchForm(Form):
+    query = TextField('query', validators=[DataRequired()])
 
 class LoginForm(Form):
     username = TextField('Username', validators=[DataRequired()])
@@ -32,6 +34,3 @@ class LoginForm(Form):
             self.username.errors.append('User not activated')
             return False
         return True
-
-class SearchForm(form):
-    search = StringField('Search', validators=[DataRequired()])

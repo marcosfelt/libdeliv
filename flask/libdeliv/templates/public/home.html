@@ -25,22 +25,13 @@
 
   <p>2. Search for a restaurant, food type, etc.<p>
 
-  <form class="form-horizontal col-md-8" role="form">
-    <div class="form-group">
-        <label for="searchbar" class="col-sm-2 control-label">Input 1</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="searchbar" placeholder="Example: Chinese">
-          </div>
-    </div>
-
-
-    <div class="input-group">
-        <span class="input-group-btn">
-          <button class="btn btn-default" type="button">Search</button>
-        </span>
-        {{ search.search }}
-        <input type="text" class="form-control" id="mysearch" placeholder="Example: Chinese">
-    </div>
+  <form action="" method="POST">
+      <!--{{ form.hidden_tag() }}-->
+      <p>
+          Example: Chinese <br>
+          {{ search.query(size=100) }}<br>
+      </p>
+      <p><input type="submit" value="Search"></p>
   </form>
 
   <br>

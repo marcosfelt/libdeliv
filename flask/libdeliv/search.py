@@ -136,7 +136,7 @@ def query_api(term, location):
     print(bearer_token)
     offset = 0
     deliverers = []
-
+    list = []
     while 1:
         try:
             response = search(bearer_token, term, offset, location)
@@ -153,13 +153,22 @@ def query_api(term, location):
                     location = delivery.get('location')
                     try:
                         simple_location = location.get('address1') + ',' + location.get('city') + ',' + location.get('state')
-                        print('{0} located at {1}. Phone: {2}'.format(
-                            delivery.get('name'),
-                            simple_location,
-                            delivery.get('phone')))
+                        dum = {' name': delivery.get('name'),
+                                'location': simple_location,
+                                'phone': delivery.get('phone')}
+                        list.append(dum)
                     except TypeError:
-                        print('{0}. Location or phone number not available'.format(delivery.get('name')))
-                return
+                        if delivery.get('location') == NoneType:
+                            dum = {' name': delivery.get('name'),
+                                   'location': 'Not Available',
+                                   'phone': delivery.get('phone')}
+                            list.append(dum)
+                        if delivery.get('phone') == NoneType:
+                            dum = {' name': delivery.get('name'),
+                                   'location': simple_location,
+                                   'phone': 'Not Available'}
+                            list.append(dum)
+                return list
 
             for business in businesses:
                 check = 'delivery' in business.get('transactions')
@@ -168,7 +177,7 @@ def query_api(term, location):
                 if check:
                     deliverers.append(business)
         except HTTPError:
-            return
+            return list
         #Have to do this in increments of 50
         #because the API returns data in groups of 50
         offset = offset + 50

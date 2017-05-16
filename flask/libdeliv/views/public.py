@@ -12,7 +12,7 @@ from libdeliv.forms.public import LoginForm, SearchForm
 from libdeliv.forms.user import RegisterForm
 from libdeliv.utils import flash_errors, render_extensions
 from libdeliv.database import db
-import libdeliv.search as Search
+from libdeliv.search import query_api
 
 blueprint = Blueprint('public', __name__, static_folder="../static")
 
@@ -23,9 +23,14 @@ def load_user(id):
 
 
 @blueprint.route("/", methods=["GET", "POST"])
+
 def home():
     form = LoginForm(request.form)
+    search = SearchForm()
+    delivery = 0
     # Handle logging in
+    if search.validate_on_submit():
+        delivery = query_api(search.query, 'San Francisco, CA')
     if request.method == 'POST':
         if form.validate_on_submit():
             login_user(form.user)
@@ -34,12 +39,10 @@ def home():
             return redirect(redirect_url)
         else:
             flash_errors(form)
-    return render_extensions("public/home.html", form=form)
-
-def search():
-    search = SearchForm(request.form)
-
-
+    return render_extensions("public/home.html",
+                            form=form,
+                            search=search,
+                            delivery=delivery)
 
 @blueprint.route('/logout/')
 @login_required
