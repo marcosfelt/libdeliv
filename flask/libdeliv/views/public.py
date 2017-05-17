@@ -8,10 +8,11 @@ from flask_login import login_user, login_required, logout_user
 
 from libdeliv.extensions import login_manager
 from libdeliv.models.user import User
-from libdeliv.forms.public import LoginForm
+from libdeliv.forms.public import LoginForm, SearchForm
 from libdeliv.forms.user import RegisterForm
 from libdeliv.utils import flash_errors, render_extensions
 from libdeliv.database import db
+from libdeliv.search import query_api, transaction_search
 
 blueprint = Blueprint('public', __name__, static_folder="../static")
 
@@ -22,9 +23,19 @@ def load_user(id):
 
 
 @blueprint.route("/", methods=["GET", "POST"])
-def home():
+
+def home(deliveries=None):
     form = LoginForm(request.form)
+    search = SearchForm()
+    if deliveries == None:
+        deliveries = []
+
+    if search.validate_on_submit():
+        query = search.query.data
+        deliveries = query_api(query)
+
     # Handle logging in
+    """
     if request.method == 'POST':
         if form.validate_on_submit():
             login_user(form.user)
@@ -33,8 +44,11 @@ def home():
             return redirect(redirect_url)
         else:
             flash_errors(form)
-    return render_extensions("public/home.html", form=form)
-
+    """
+    return render_extensions("public/home.html",
+                            form=form,
+                            search=search,
+                            deliveries=deliveries)
 
 @blueprint.route('/logout/')
 @login_required

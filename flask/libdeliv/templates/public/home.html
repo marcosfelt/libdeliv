@@ -1,0 +1,74 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<!-- Main jumbotron for a primary marketing message or call to action -->
+<div class="jumbotron">
+
+  <h1>Welcome to LibDeliv</h1>
+
+  <p>Get food without ever leaving your study spot</p>
+</div><!-- /.jumbotron -->
+
+<div class="body-content">
+  <p>1. Choose a library </p>
+  <div class="dropdown">
+      <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        Choose a Library
+      <span class="caret"></span>
+  </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+      <li><a href="#">Hunt Library</a></li>
+      <li><a href="#">DH Hill Library</a></li>
+      <!--<li role="separator" class="divider"></li>-->
+    </ul>
+  </div>
+
+  <p>2. Search for a restaurant, food type, etc.<p>
+
+  <form action="" method="POST">
+      {{ form.hidden_tag() }}
+      <p>
+          {{ search.query(size=100) }}<br>
+      </p>
+      <p><input type="submit" value="Search"></p>
+  </form>
+
+  <br>
+  <p> Suggested Restaurants </p>
+    {% for delivery in deliveries %}
+        <div class="panel panel-default">
+          <div class ="panel-heading">
+            <a href="{{ delivery.url }}" target="_blank"> {{ delivery.name }}</a>
+          </div>
+
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-lg-2">
+                <a href="{{ delivery.url }}" target="_blank">
+                  <img src="{{ delivery.image_url }}" class="img-thumbnail"></img>
+                </a>
+              </div>
+
+              <div class="col-lg-2">
+                <!--<p> {{ delivery.location }} </p>-->
+                <p>
+                  {% for category in delivery.categories %}
+                  {{ category.title }},
+                  {% endfor %}
+                </p>
+                <p> Rating: {{ delivery.rating }} out of 5.0 stars </p>
+                <p> Phone: <a href="tel: {{ delivery.phone }}"> {{ delivery.phone }}</a></p>
+                <p>
+                  Website:<a href="{{ delivery.url }}" target="_blank"> {{ delivery.name }}</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% else %}
+      <p> No results found </p>
+    {% endfor %}
+</div>
+
+
+{% endblock %}

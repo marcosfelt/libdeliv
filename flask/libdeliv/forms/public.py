@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from flask_wtf import Form
-from wtforms import TextField, PasswordField
+from wtforms import TextField, PasswordField, StringField
 from wtforms.validators import DataRequired
 
 from libdeliv.models.user import User
 
+class SearchForm(Form):
+    query = StringField ('query', validators=[DataRequired()])
 
 class LoginForm(Form):
     username = TextField('Username', validators=[DataRequired()])
