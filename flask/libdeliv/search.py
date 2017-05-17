@@ -158,14 +158,21 @@ def query_api(term, location):
                                 'phone': delivery.get('phone')}
                         list.append(dum)
                     except TypeError:
-                        if delivery.get('location') == NoneType:
+                        location_check = delivery.get('location') == NoneType
+                        phone_check = delivery.get('phone') == NoneType
+                        if location_check and not phone_check:
                             dum = {' name': delivery.get('name'),
                                    'location': 'Not Available',
                                    'phone': delivery.get('phone')}
                             list.append(dum)
-                        if delivery.get('phone') == NoneType:
+                        if not location_check and phone_check:
                             dum = {' name': delivery.get('name'),
                                    'location': simple_location,
+                                   'phone': 'Not Available'}
+                            list.append(dum)
+                        if location_check and phone_check:
+                            dum = {' name': delivery.get('name'),
+                                   'location': 'Not Available',
                                    'phone': 'Not Available'}
                             list.append(dum)
                 return list

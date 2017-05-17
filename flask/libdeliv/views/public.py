@@ -28,9 +28,12 @@ def home():
     form = LoginForm(request.form)
     search = SearchForm()
     delivery = 0
-    # Handle logging in
+
     if search.validate_on_submit():
-        delivery = query_api(search.query, 'San Francisco, CA')
+        query = search.query.data
+        deliveries = query_api(query, 'San Francisco, CA')
+    # Handle logging in
+    """
     if request.method == 'POST':
         if form.validate_on_submit():
             login_user(form.user)
@@ -39,10 +42,11 @@ def home():
             return redirect(redirect_url)
         else:
             flash_errors(form)
+    """
     return render_extensions("public/home.html",
                             form=form,
                             search=search,
-                            delivery=delivery)
+                            deliveries=deliveries)
 
 @blueprint.route('/logout/')
 @login_required
