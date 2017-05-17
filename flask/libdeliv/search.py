@@ -33,6 +33,7 @@ CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 API_HOST = 'https://api.yelp.com'
 SEARCH_PATH = '/v3/businesses/search'
 BUSINESS_PATH = '/v3/businesses/'  # Business ID will come after slash.
+TRANSACTION_PATH='/v3/transactions/delivery/search'
 TOKEN_PATH = '/oauth2/token'
 GRANT_TYPE = 'client_credentials'
 
@@ -94,6 +95,17 @@ def request(host, path, bearer_token, url_params=None):
 
     return response.json()
 
+def transaction_search(bearer_token, location):
+    """Query the Transactio API by a location.
+    Args:
+        location (str): The search location passed to the API.
+    Returns:
+        dict: The JSON response from the request.
+    """
+    url_params = {'location': location.replace(' ', '+')}
+    print(location.replace(' ', '+'))
+
+    return request(API_HOST,TRANSACTION_PATH,bearer_token,url_params=url_params)
 
 def search(bearer_token, term, offset, location):
     """Query the Search API by a search term and location.
@@ -124,8 +136,7 @@ def get_business(bearer_token, business_id):
 
     return request(API_HOST, business_path, bearer_token)
 
-
-def query_api(term, location):
+def query_api(location):
     """Queries the API by the input values from the user.
     Args:
         term (str): The search term to query.
@@ -133,58 +144,21 @@ def query_api(term, location):
     """
     #bearer_token = obtain_bearer_token(API_HOST, TOKEN_PATH)
     bearer_token ='SHdrjUqMJXqXBKUc7bGIplM8y6tnbwZbXXDbWPCd9wWMP8tX9PdJrC5MZHwJRhb7jMtLjXxT-hsWjNf2OkdiDWd30HsS84AVI5iRnrpxkak3HbWXAdUKvraQ_wgXWXYx'
-    print(bearer_token)
-    offset = 0
-    deliverers = []
-    list = []
-    while 1:
-        try:
-            response = search(bearer_token, term, offset, location)
-            businesses = response.get('businesses')
+    response =  transaction_search(bearer_token,location)
+    response = response.get('businesses')
+    return response
 
-            if not businesses and offset==0:
-                print(u'No businesses for delivery found in {0}.'.format( location))
-                return
+def main():
+    """Queries the API by the input values from the user.
+    Args:
+        term (str): The search term to query.
+        location (str): The location of the business to query.
+    """
+    #bearer_token = obtain_bearer_token(API_HOST, TOKEN_PATH)
+    bearer_token ='SHdrjUqMJXqXBKUc7bGIplM8y6tnbwZbXXDbWPCd9wWMP8tX9PdJrC5MZHwJRhb7jMtLjXxT-hsWjNf2OkdiDWd30HsS84AVI5iRnrpxkak3HbWXAdUKvraQ_wgXWXYx'
+    response =  transaction_search(bearer_token, '1910 Entrepreneur Dr, Raleigh, NC 27518')
+    response = response.get('businesses')
+    print(json.dumps(response, indent=4))
 
-            if not businesses and offset!=0:
-                print(u'{0} businesses found that deliver in your area'.format(len(deliverers)))
-
-                for delivery in deliverers:
-                    location = delivery.get('location')
-                    try:
-                        simple_location = location.get('address1') + ',' + location.get('city') + ',' + location.get('state')
-                        dum = {' name': delivery.get('name'),
-                                'location': simple_location,
-                                'phone': delivery.get('phone')}
-                        list.append(dum)
-                    except TypeError:
-                        location_check = delivery.get('location') == NoneType
-                        phone_check = delivery.get('phone') == NoneType
-                        if location_check and not phone_check:
-                            dum = {' name': delivery.get('name'),
-                                   'location': 'Not Available',
-                                   'phone': delivery.get('phone')}
-                            list.append(dum)
-                        if not location_check and phone_check:
-                            dum = {' name': delivery.get('name'),
-                                   'location': simple_location,
-                                   'phone': 'Not Available'}
-                            list.append(dum)
-                        if location_check and phone_check:
-                            dum = {' name': delivery.get('name'),
-                                   'location': 'Not Available',
-                                   'phone': 'Not Available'}
-                            list.append(dum)
-                return list
-
-            for business in businesses:
-                check = 'delivery' in business.get('transactions')
-                #print(business.get('transactions'))
-                #print(check)
-                if check:
-                    deliverers.append(business)
-        except HTTPError:
-            return list
-        #Have to do this in increments of 50
-        #because the API returns data in groups of 50
-        offset = offset + 50
+if __name__ == '__main__':
+    main()

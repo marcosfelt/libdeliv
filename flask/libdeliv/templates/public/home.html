@@ -28,7 +28,6 @@
   <form action="" method="POST">
       {{ form.hidden_tag() }}
       <p>
-          Example: Chinese <br>
           {{ search.query(size=100) }}<br>
       </p>
       <p><input type="submit" value="Search"></p>
@@ -36,20 +35,39 @@
 
   <br>
   <p> Suggested Restaurants </p>
-  {% for delivery in deliveries %}
-      <div class="panel panel-primary">
-        <div class="row">
-          <div class="col-lg-2">
-            <img src="{{ delivery.image }}" ></img>
+    {% for delivery in deliveries %}
+        <div class="panel panel-default">
+          <div class ="panel-heading">
+            <a href="{{ delivery.url }}" target="_blank"> {{ delivery.name }}</a>
           </div>
 
-          <div class="col-lg-2">
-            <p> {{ delivery.name }} </p>
-            <p> {{ delivery.location }} </p>
-            <p> <a href="{{ delivery.phone }}"> {{ delivery.phone }}</a></p>
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-lg-2">
+                <a href="{{ delivery.url }}" target="_blank">
+                  <img src="{{ delivery.image_url }}" class="img-thumbnail"></img>
+                </a>
+              </div>
+
+              <div class="col-lg-2">
+                <!--<p> {{ delivery.location }} </p>-->
+                <p>
+                  {% for category in delivery.categories %}
+                  {{ category.title }},
+                  {% endfor %}
+                </p>
+                <p> Rating: {{ delivery.rating }} out of 5.0 stars </p>
+                <p> Phone: <a href="tel: {{ delivery.phone }}"> {{ delivery.phone }}</a></p>
+                <p>
+                  Website:<a href="{{ delivery.url }}" target="_blank"> {{ delivery.name }}</a>
+                </p>
+              </div>
+            </div>
           </div>
-      </div>
-  {% endfor %}
+        </div>
+    {% else %}
+      <p> No results found </p>
+    {% endfor %}
 </div>
 
 
